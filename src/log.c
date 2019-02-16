@@ -77,6 +77,11 @@ void log_set_fp(FILE *fp) {
 }
 
 
+const char* log_get_level_name() {
+  return level_names[L.level];
+}
+
+
 void log_set_level(int level) {
   L.level = level;
 }

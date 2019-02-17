@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2017 rxi
+/**
+ * Copyright (c) 2017 rxi, 2019 nrser
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -25,6 +25,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <time.h>
+#include <ctype.h>
 
 #include "log.h"
 
@@ -77,6 +78,11 @@ void log_set_fp(FILE *fp) {
 }
 
 
+int log_get_level() {
+  return L.level;
+}
+
+
 const char* log_get_level_name() {
   return level_names[L.level];
 }
@@ -84,6 +90,93 @@ const char* log_get_level_name() {
 
 void log_set_level(int level) {
   L.level = level;
+}
+
+
+/**
+ * @brief Convert log level name to level integer (that you can use in in
+ * log_set_level()).
+ * 
+ * @param name 
+ *    When up-cased, should be one of level_names.
+ * 
+ * @return int 
+ *    Log level integer, or `-1` on error (logs an error as well).
+ */
+int log_name_to_level(char* name) {
+  char *upcased = strdup(name); // make a copy
+
+  // adjust copy to lowercase
+  unsigned char *ptr = (unsigned char *)upcased;
+  while(*ptr) {
+      *ptr = toupper(*ptr);
+      ptr++;
+  }
+  
+  for (int i = LOG_TRACE; i <= LOG_FATAL; i++) {
+    if (strcmp(level_names[i], upcased) == 0) {
+      return i;
+    }
+  }
+  
+  log_error("Level name '%s' not found", upcased);
+  return -1;
+}
+
+
+/**
+ * @brief Set level given a string, which may be the string representation of
+ * one of the level integers, or one of the level_names (case insensitive).
+ * 
+ * @see log_set_level_by_name()
+ *
+ * @param string
+ *    Either a string representation of a level integer - "0" (LOG_TRACE)
+ *    through "5" (LOG_FATAL) - or one of the level_names - "TRACE", "DEBUG",
+ *    "INFO", "WARN", "ERROR" or "FATAL" (case-insensitive).
+ *
+ * @return int
+ *    Level that was set, or `-1` on failure.
+ */
+int log_set_level_from_string(char* string) {
+  size_t length = strlen(string);
+  
+  if (length == 0) {
+    log_error("Received empty string");
+    return -1;
+  }
+  
+  if (length == 1) {
+    for (int level = LOG_TRACE; level <= LOG_FATAL; level++) {
+      int num = string[0] - '0';
+      if (num == level) {
+        log_set_level(level);
+        return level;
+      }
+    }
+  }
+  
+  return log_set_level_by_name(string);
+}
+
+/**
+ * @brief Set the log level by a level_names member.
+ * 
+ * @see log_name_to_level()
+ * 
+ * @param name
+ *    One of the level_names - "TRACE", "DEBUG", "INFO", "WARN", "ERROR" or
+ *    "FATAL" (case-insensitive).
+ * 
+ * @return int 
+ *    The level that was set, or `-1` on failure.
+ */
+int log_set_level_by_name(char* name) {
+  int level = log_name_to_level(name);
+  if (level != -1) {
+    log_set_level(level);
+  }
+  return level;
 }
 
 

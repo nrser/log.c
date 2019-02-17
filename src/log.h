@@ -28,7 +28,10 @@ void log_set_udata(void *udata);
 void log_set_lock(log_LockFn fn);
 void log_set_fp(FILE *fp);
 void log_set_level(int level);
+int log_set_level_by_name(char* name);
+int log_set_level_from_string(char* string);
 void log_set_quiet(int enable);
+int log_get_level();
 const char* log_get_level_name();
 
 void log_log(int level, const char *file, int line, const char *fmt, ...);

@@ -42,11 +42,39 @@ static const char *level_names[] = {
   "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"
 };
 
+static int has_init_from_env = 0;
+
 #ifdef LOG_USE_COLOR
 static const char *level_colors[] = {
   "\x1b[94m", "\x1b[36m", "\x1b[32m", "\x1b[33m", "\x1b[31m", "\x1b[35m"
 };
 #endif
+
+
+/**
+ * @brief Initialize L (logger structure) values from environment variables,
+ * if present.
+ * 
+ * Only handles setting the log level. LOG_LEVEL_ENV_VAR is used as the env
+ * var name, which defaults to "LOG_LEVEL", but a custom prefix can be added
+ * by defining LOG_ENV_VAR_PREFIX.
+ * 
+ * Sets a flag the fist time called, then just returns immediately on subsequent
+ * calls, so don't worry about calling it multiple times in multiple places.
+ */
+void log_init_from_env(void) {
+  if (has_init_from_env) {
+    return;
+  }
+  
+  char *value = getenv(LOG_LEVEL_ENV_VAR);
+  
+  if (value != NULL) {
+    log_set_level_from_string(value);
+  }
+  
+  has_init_from_env = 1;
+}
 
 
 static void lock(void)   {

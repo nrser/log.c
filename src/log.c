@@ -48,6 +48,11 @@ static int has_init_from_env = 0;
 static const char *level_colors[] = {
   "\x1b[94m", "\x1b[36m", "\x1b[32m", "\x1b[33m", "\x1b[31m", "\x1b[35m"
 };
+
+static const char *
+level_color(int level) {
+  return level_colors[level - LOG_TRACE];
+}
 #endif
 
 
@@ -111,8 +116,14 @@ int log_get_level() {
 }
 
 
+const char *
+level_name(int level) {
+  return level_names[ level - LOG_TRACE ];
+}
+
+
 const char* log_get_level_name() {
-  return level_names[L.level];
+  return level_name(L.level);
 }
 
 
@@ -142,7 +153,7 @@ int log_name_to_level(char* name) {
   }
   
   for (int i = LOG_TRACE; i <= LOG_FATAL; i++) {
-    if (strcmp(level_names[i], upcased) == 0) {
+    if (strcmp(level_name(i), upcased) == 0) {
       return i;
     }
   }
@@ -233,9 +244,9 @@ void log_log(int level, const char *file, int line, const char *fmt, ...) {
 #ifdef LOG_USE_COLOR
     fprintf(
       stderr, "%s %s%-5s\x1b[0m \x1b[90m%s:%d:\x1b[0m ",
-      buf, level_colors[level], level_names[level], file, line);
+      buf, level_color(level), level_name(level), file, line);
 #else
-    fprintf(stderr, "%s %-5s %s:%d: ", buf, level_names[level], file, line);
+    fprintf(stderr, "%s %-5s %s:%d: ", buf, level_name(level), file, line);
 #endif
     va_start(args, fmt);
     vfprintf(stderr, fmt, args);
@@ -249,7 +260,7 @@ void log_log(int level, const char *file, int line, const char *fmt, ...) {
     va_list args;
     char buf[32];
     buf[strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", lt)] = '\0';
-    fprintf(L.fp, "%s %-5s %s:%d: ", buf, level_names[level], file, line);
+    fprintf(L.fp, "%s %-5s %s:%d: ", buf, level_name(level), file, line);
     va_start(args, fmt);
     vfprintf(L.fp, fmt, args);
     va_end(args);

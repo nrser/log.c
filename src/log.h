@@ -46,8 +46,17 @@ int log_set_level_by_name(char* name);
 int log_set_level_from_string(char* string);
 void log_set_quiet(int enable);
 int log_get_level();
-const char* log_get_level_name();
+const char *log_get_level_name();
+const char *level_name(int level);
+FILE *log_get_fp();
 
 void log_log(int level, const char *file, int line, const char *fmt, ...);
+
+#ifdef LOG_USE_COLOR
+
+const char *
+level_color(int level);
+
+#endif // #ifdef LOG_USE_COLOR
 
 #endif

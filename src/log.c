@@ -49,7 +49,7 @@ static const char *level_colors[] = {
   "\x1b[94m", "\x1b[36m", "\x1b[32m", "\x1b[33m", "\x1b[31m", "\x1b[35m"
 };
 
-static const char *
+const char *
 level_color(int level) {
   return level_colors[level - LOG_TRACE];
 }
@@ -111,18 +111,22 @@ void log_set_fp(FILE *fp) {
 }
 
 
+FILE *log_get_fp() {
+  return L.fp;
+}
+
+
 int log_get_level() {
   return L.level;
 }
 
 
-const char *
-level_name(int level) {
+const char *level_name(int level) {
   return level_names[ level - LOG_TRACE ];
 }
 
 
-const char* log_get_level_name() {
+const char *log_get_level_name() {
   return level_name(L.level);
 }
 

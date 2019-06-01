@@ -29,6 +29,10 @@
 
 #include "log.h"
 
+
+// Globals
+// ===========================================================================
+
 static struct {
   void *udata;
   log_LockFn lock;
@@ -42,18 +46,35 @@ static const char *level_names[] = {
   "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"
 };
 
+
+/**
+ * @brief Internally keeps track of if log_init_from_env() has been called.
+ */
 static int has_init_from_env = 0;
 
+
 #ifdef LOG_USE_COLOR
+// ---------------------------------------------------------------------------
+
 static const char *level_colors[] = {
   "\x1b[94m", "\x1b[36m", "\x1b[32m", "\x1b[33m", "\x1b[31m", "\x1b[35m"
 };
+
+#endif // #ifdef LOG_USE_COLOR ***********************************************
+
+
+// Functions
+// ===========================================================================
+
+#ifdef LOG_USE_COLOR
+// ---------------------------------------------------------------------------
 
 const char *
 level_color(int level) {
   return level_colors[level - LOG_TRACE];
 }
-#endif
+
+#endif // #ifdef LOG_USE_COLOR ***********************************************
 
 
 /**
@@ -79,7 +100,7 @@ void log_init_from_env(void) {
   }
   
   has_init_from_env = 1;
-}
+} // log_init_from_env()
 
 
 static void lock(void)   {
@@ -220,6 +241,11 @@ int log_set_level_by_name(char* name) {
     log_set_level(level);
   }
   return level;
+}
+
+
+int log_get_quiet() {
+  return L.quiet;
 }
 
 

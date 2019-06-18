@@ -11,6 +11,9 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+// Defines the `bool` type, etc.
+#include <stdbool.h>
+
 #define LOG_VERSION "0.1.0"
 
 #ifndef LOG_ENV_VAR_PREFIX
@@ -21,6 +24,21 @@
 
 typedef void (*log_LockFn)(void *udata, int lock);
 
+/**
+ * @brief The available levels.
+ * 
+ * @note @parblock
+ *    Levels *may* be negative - LOG_TRACE is defined as `-1` so that the rest
+ *    match with Ruby's [Logger::Severity][] constants, which would be much 
+ *    harder to change, but values **MUST** be contiguous!!!
+ *    
+ *    If non-contiguous values are used **all sorts of stuff will break** and
+ *    programs will almost certainly crash.
+ *    
+ *    [Logger::Severity]: https://docs.ruby-lang.org/en/2.3.0/Logger/Severity.html
+ * @endparblock
+ * 
+ */
 enum {
   LOG_TRACE = -1,
   LOG_DEBUG = 0,
@@ -37,26 +55,47 @@ enum {
 #define log_error(...) log_log(LOG_ERROR, __FILE__, __LINE__, __VA_ARGS__)
 #define log_fatal(...) log_log(LOG_FATAL, __FILE__, __LINE__, __VA_ARGS__)
 
-void log_init_from_env(void);
-void log_set_udata(void *udata);
-void log_set_lock(log_LockFn fn);
-void log_set_fp(FILE *fp);
-void log_set_level(int level);
-int log_set_level_by_name(char* name);
-int log_set_level_from_string(char* string);
-int log_get_quiet(void);
-void log_set_quiet(int enable);
-int log_get_level();
-const char *log_get_level_name();
-const char *level_name(int level);
-FILE *log_get_fp();
 
-void log_log(int level, const char *file, int line, const char *fmt, ...);
+// Function Declarations (Public API)
+// ===========================================================================
+
+// Functional Utilties
+// ---------------------------------------------------------------------------
+
+bool        log_is_level              (int level);
+const char *log_level_to_name         (int level);
+char      **log_level_strings         (void);
+char       *log_level_to_string       (int level);
 
 #ifdef LOG_USE_COLOR
 
-const char *level_color(int level);
+const char *log_level_to_color        (int level);
 
 #endif // #ifdef LOG_USE_COLOR
 
-#endif
+// State
+// ---------------------------------------------------------------------------
+
+FILE       *log_get_fp                (void);
+int         log_get_level             (void);
+const char *log_get_level_name        (void);
+bool        log_get_quiet             (void);
+void        log_set_fp                (FILE *fp);
+void        log_set_level             (int level);
+int         log_set_level_by_name     (char* name);
+int         log_set_level_from_string (char* string);
+void        log_set_lock              (log_LockFn fn);
+void        log_set_quiet             (bool enable);
+void        log_set_udata             (void *udata);
+
+// Doin' Stuff
+// ---------------------------------------------------------------------------
+
+void        log_init_from_env         (void);
+void        log_log                   (int level,
+                                       const char *file,
+                                       int line,
+                                       const char *fmt,
+                                       ...);
+
+#endif // #ifndef LOG_H
